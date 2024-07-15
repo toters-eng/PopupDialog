@@ -43,6 +43,12 @@ final public class PopupDialog: UIViewController {
 
     /// The completion handler
     fileprivate var completion: (() -> Void)?
+    
+    /// Tap gesture action
+    fileprivate var tapGestureAction: (() -> Void)?
+    
+    /// Pan gesture action
+    fileprivate var panGestureAction: (() -> Void)?
 
     /// The custom transition presentation manager
     fileprivate var presentationManager: PresentationManager!
@@ -100,6 +106,8 @@ final public class PopupDialog: UIViewController {
                 tapGestureDismissal: Bool = true,
                 panGestureDismissal: Bool = true,
                 hideStatusBar: Bool = false,
+                tapGestureAction: (() -> Void)? = nil,
+                panGestureAction: (() -> Void)? = nil,
                 completion: (() -> Void)? = nil) {
 
         // Create and configure the standard popup dialog view
@@ -116,6 +124,8 @@ final public class PopupDialog: UIViewController {
                   tapGestureDismissal: tapGestureDismissal,
                   panGestureDismissal: panGestureDismissal,
                   hideStatusBar: hideStatusBar,
+                  tapGestureAction: tapGestureAction,
+                  panGestureAction: panGestureAction,
                   completion: completion)
     }
 
@@ -141,6 +151,8 @@ final public class PopupDialog: UIViewController {
         tapGestureDismissal: Bool = true,
         panGestureDismissal: Bool = true,
         hideStatusBar: Bool = false,
+        tapGestureAction: (() -> Void)? = nil,
+        panGestureAction: (() -> Void)? = nil,
         completion: (() -> Void)? = nil) {
 
         self.viewController = viewController
@@ -151,10 +163,11 @@ final public class PopupDialog: UIViewController {
 
         // Init the presentation manager
         presentationManager = PresentationManager(transitionStyle: transitionStyle, interactor: interactor)
-
+            
         // Assign the interactor view controller
         interactor.viewController = self
-
+            //Assign the interactor delegate
+            interactor.delegate = self
         // Define presentation styles
         transitioningDelegate = presentationManager
         modalPresentationStyle = .custom
@@ -229,7 +242,11 @@ final public class PopupDialog: UIViewController {
         // Make sure it's not a tap on the dialog but the background
         let point = sender.location(in: popupContainerView.stackView)
         guard !popupContainerView.stackView.point(inside: point, with: nil) else { return }
-        dismiss()
+        dismiss() {
+            [weak self] in
+            guard let self else {return}
+            self.tapGestureAction?()
+        }
     }
 
     /*!
@@ -338,5 +355,15 @@ extension PopupDialog {
     /// Performs a shake animation on the dialog
     @objc public func shake() {
         popupContainerView.pv_shake()
+    }
+}
+
+extension PopupDialog: InteractiveTransitionDelegate {
+    func panGestureDidBegin() {
+        self.dismiss() {
+            [weak self] in
+            guard let self else {return}
+            self.panGestureAction?()
+        }
     }
 }

@@ -39,6 +39,8 @@ final internal class InteractiveTransition: UIPercentDrivenInteractiveTransition
     // with attached gesture recognizers
     weak var viewController: UIViewController?
 
+    weak var delegate: InteractiveTransitionDelegate?
+    
     @objc func handlePan(_ sender: UIPanGestureRecognizer) {
 
         guard let vc = viewController else { return }
@@ -48,7 +50,7 @@ final internal class InteractiveTransition: UIPercentDrivenInteractiveTransition
         switch sender.state {
         case .began:
             hasStarted = true
-            vc.dismiss(animated: true, completion: nil)
+            delegate?.panGestureDidBegin()
         case .changed:
             shouldFinish = progress > 0.3
             update(progress)
