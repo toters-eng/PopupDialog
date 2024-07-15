@@ -158,6 +158,8 @@ final public class PopupDialog: UIViewController {
         self.viewController = viewController
         self.preferredWidth = preferredWidth
         self.hideStatusBar = hideStatusBar
+        self.tapGestureAction = tapGestureAction
+        self.panGestureAction = panGestureAction
         self.completion = completion
         super.init(nibName: nil, bundle: nil)
 
@@ -166,8 +168,10 @@ final public class PopupDialog: UIViewController {
             
         // Assign the interactor view controller
         interactor.viewController = self
-            //Assign the interactor delegate
-            interactor.delegate = self
+            
+        //Assign the interactor delegate
+        interactor.delegate = self
+            
         // Define presentation styles
         transitioningDelegate = presentationManager
         modalPresentationStyle = .custom
